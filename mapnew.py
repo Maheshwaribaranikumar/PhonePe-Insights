@@ -220,7 +220,7 @@ if section == "PhonePe":
             state_list = df_users['State'].dropna().unique()
             state = st.selectbox("Select State", sorted(state_list))
             st.markdown(f"### Top 10 Districts")
-            top_districts = df_users[df_users['State'] == state].groupby("District")["RegisteredUsers"].sum().sort_values(ascending=False).head(10)
+            top_districts = df_users[df_users['State'] == state].groupby("State")["RegisteredUsers"].sum().sort_values(ascending=False).head(10)
             for idx, val in top_districts.items():
                 st.markdown(f"**{idx}**: `{val:,}`")
 
