@@ -1,18 +1,19 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import streamlit as st
 import requests
+import pandas as pd
+import plotly.express as px
 from sqlalchemy import create_engine
-from datetime import datetime
 import sqlite3
-# Connect to the SQLite database
 from sqlalchemy import inspect
-
-engine = create_engine('mysql+pymysql://root:Mahesh@localhost/phonepe_data')
-inspector = inspect(engine)
-tables = inspector.get_table_names()
-print(tables)
-
+conn=sqlite3.connect("phonepe_data.db")
+#engine = create_engine('mysql+pymysql://root:Mahesh@localhost/phonepe_data')
+#engine=create_engine("sqlitw:///")
+#inspector = inspect(engine)
+#tables = inspector.get_table_names()
+#print(tables)
 # Set wide layout
 st.set_page_config(layout="wide")
 
@@ -61,6 +62,17 @@ if section == "PhonePe":
     agg_insurance = pd.read_csv("C:/Users/mahes/OneDrive/Desktop/PhonePe/.venv/aggregated_insurance.csv")
     map_insurance = pd.read_csv("C:/Users/mahes/OneDrive/Desktop/PhonePe/.venv/map_insurance.csv")
     top_insurance = pd.read_csv("C:/Users/mahes/OneDrive/Desktop/PhonePe/.venv/top_insurance.csv")
+    agg_trans.to_sql("aggregated_transaction", conn, if_exists="replace", index=False)
+    agg_user.to_sql("aggregated_user", conn, if_exists="replace", index=False)
+    map_trans.to_sql("map_transaction", conn, if_exists="replace", index=False)
+    map_user.to_sql("map_user", conn, if_exists="replace", index=False)
+    top_trans.to_sql("top_transaction", conn, if_exists="replace", index=False)
+    top_user.to_sql("top_user", conn, if_exists="replace", index=False)
+    agg_insurance.to_sql("aggregated_insurance", conn, if_exists="replace", index=False)
+    map_insurance.to_sql("map_insurance", conn, if_exists="replace", index=False)
+    top_insurance.to_sql("top_insurance", conn, if_exists="replace", index=False)
+    conn.commit()
+    conn.close()
     st.title("PhonePe Pulse - State-wise Analysis")
 
     # Create columns for map and category details (opposite to each other)
@@ -220,10 +232,8 @@ if section == "PhonePe":
             top_districts = df_users[df_users['State'] == state].groupby("State")["RegisteredUsers"].sum().sort_values(ascending=False).head(10)
             for idx, val in top_districts.items():
                 st.markdown(f"**{idx}**: `{val:,}`")
-
 elif section == "Case Studies":
     st.title("Case Studies")
-    #st.markdown("Explore case studies on PhonePe transaction and user data.")
     case_study = st.selectbox("Select a Case Study", [
         '1. Decoding Transaction Dynamics on PhonePe',
         '2. Device Dominance and User Engagement Analysis',
@@ -293,13 +303,14 @@ elif section == "Case Studies":
         ],
     }
     suboptions = query_map.get(case_study, [])
+   
 
     if suboptions:
         sub_choice_label = st.selectbox("Choose a sub-topic", [s[0] for s in suboptions])
         selected_query, supported_charts = [(s[1], s[2]) for s in suboptions if s[0] == sub_choice_label][0]       
         # Execute the modified query
         try:
-            df = pd.read_sql_query(selected_query, con=engine)
+            df = pd.read_sql_query(selected_query, con=conn)
             st.subheader(sub_choice_label)
             #st.dataframe(df)
 
