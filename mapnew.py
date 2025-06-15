@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import requests
-import streamlit as st
 from sqlalchemy import create_engine
 from datetime import datetime
 import sqlite3
